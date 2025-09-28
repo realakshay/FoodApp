@@ -41,5 +41,32 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
     console.log('login endpoint hit');
-    res.json({ message: 'login endpoint works' });
+    try{
+        const { email, password } = req.body;
+        const userExists = await User.findOne({email});
+        if(!userExists){
+            return res.status(400).json({message: 'Invalid credentials'})
+        }
+        const isPasswordCorrect = await bcrypt.compare(password, userExists.password);
+        if(!isPasswordCorrect){
+            return res.status(400).json({message: 'Invalid credentials'})
+        }
+        const token = jwt.sign({id: userExists._id}, process.env.JWT_SECRET, {expiresIn: '1d'});
+        res.status(200).json({
+            id: userExists._id,
+            name: userExists.name,
+            email: userExists.email,
+            token
+        });
+    }catch(error){
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Server error' })
+    }
+}
+
+exports.profile = async (req, res) => {
+    if(!req.user){
+        return res.status(401).json({message: 'Not authorized'})
+    }
+    res.status(200).json(req.user);
 }
