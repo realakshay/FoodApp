@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors());
+app.use(express.json())
 
 
 // Proxy setup
@@ -21,7 +22,22 @@ app.use('/auth', createProxyMiddleware({
     }
 }));
 
-app.use(express.json())
+
+app.use('/restaurants', createProxyMiddleware({
+    target: `http://localhost:5001`,
+    changeOrigin: true,
+    pathRewrite: { '^/restaurants': '' }, // <-- Add this
+    onProxyReq: (proxyReq, req, res) => {
+        if (req.body && Object.keys(req.body).length) {
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+        }
+    }
+}));
+
+
 
 app.get('/api/health', (req, res)=>{
     res.json({status: "API Gateway running"})
