@@ -16,6 +16,7 @@ const verifyToken = (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
+    console.log("Here in isAdmin", req.user);
     if (req.user && req.user.isAdmin) {
         return next();
     }
