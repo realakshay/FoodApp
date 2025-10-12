@@ -11,5 +11,6 @@ router.delete('/:id', verifyToken, isAdmin, controller.deleteRestaurant);
 router.put('/:id', verifyToken, isAdmin, controller.updateRestaurant);
 
 router.get('/:id/menu', controller.getMenu);
+router.get('/:id/menu/:itemId', controller.getMenuItemById);
 
 module.exports = router;

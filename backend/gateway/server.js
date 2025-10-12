@@ -25,7 +25,7 @@ app.use('/auth', createProxyMiddleware({
 app.use('/restaurants', createProxyMiddleware({
     target: `http://localhost:5001`,
     changeOrigin: true,
-    pathRewrite: { '^/restaurants': '' }, // <-- Add this
+    pathRewrite: { '^/restaurants': '' }, 
     onProxyReq: (proxyReq, req, res) => {
         if (req.body && Object.keys(req.body).length) {
             const bodyData = JSON.stringify(req.body);
@@ -35,6 +35,20 @@ app.use('/restaurants', createProxyMiddleware({
         }
     }
 }));
+
+app.use('/orders', createProxyMiddleware({
+    target: `http://localhost:5002`,
+    changeOrigin: true,
+    pathRewrite: { '^/orders': '' },
+    onProxyReq: (proxyReq, req, res) => {
+        if (req.body && Object.keys(req.body).length) {
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+        }
+    }
+}))
 
 app.use(express.json());
 

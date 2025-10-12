@@ -88,3 +88,19 @@ exports.addMenuItem = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 }
+
+exports.getMenuItemById = async (req, res) => {
+    try {
+        const restaurant = await Restaurant.findById(req.params.id);
+        if(!restaurant){
+            return res.status(404).json({message: 'Restaurant not found'});
+        }
+        const menuItem = restaurant.menu.id(req.params.itemId);
+        if(!menuItem){
+            return res.status(404).json({message: 'Menu item not found'});
+        }
+        return res.status(200).json(menuItem);
+    }catch(error){
+        res.status(500).json({ message: 'Server error' });
+    }
+}
