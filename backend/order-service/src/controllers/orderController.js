@@ -65,7 +65,20 @@ exports.createOrder = async (req, res) => {
 exports.getMyOrders = async (req, res) => {
     try {
         const orders = await Order.find({ user: req.user.id }).sort({ createdAt: -1 });
-        res.status(200).json(orders);
+        if(orders){
+            const restaurantIds = [...new Set(orders.map(o => o.restaurant.toString()))];
+            const restaurantsData = await axios.post('http://localhost:4000/restaurants/base/batch', { ids: restaurantIds }, {
+                headers: { Authorization: req.headers.authorization }
+            });
+            const restaurantMap = {};
+            restaurantsData.data.forEach(r => restaurantMap[r._id] = r);
+            const ordersWithDetails = orders.map(order => ({
+                ...order.toObject(),
+                restaurant: restaurantMap[order.restaurant.toString()]
+            }));
+            return res.status(200).json(ordersWithDetails);
+        }
+        return res.status(200).json([]);
     } catch (error) {
         console.log("ERROR",error);
         res.status(500).json({ message: 'Server error' });

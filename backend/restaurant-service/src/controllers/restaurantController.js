@@ -22,6 +22,19 @@ exports.getRestaurantById = async (req, res) => {
     }
 }
 
+exports.getRestaurantByBatch = async (req, res) => {
+    try{
+        const ids = req.body.ids;
+        if(!Array.isArray(ids) || ids.length === 0){
+            return res.status(400).json({message: 'Invalid IDs'});
+        }
+        const restaurants = await Restaurant.find({_id: {$in: ids}}).select('name description');
+        return res.status(200).json(restaurants)
+    }catch(error){
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
 exports.getAllRestaurants = async (req, res) => {
     try {
         const {query, tag} = req.query;
@@ -104,3 +117,4 @@ exports.getMenuItemById = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 }
+
